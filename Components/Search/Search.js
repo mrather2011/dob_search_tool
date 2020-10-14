@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import Results from "../Results/Results";
+import Toggle from "../Toggle";
 
 import {
   Container,
@@ -43,6 +45,7 @@ export default function Search() {
   const setParamsHandler = () => {
     setParams({
       borough: "MANHATTAN",
+      $limit: 100,
     });
   };
 
@@ -204,6 +207,7 @@ export default function Search() {
         maxWidth="md"
         style={{ height: "500px", border: "1px solid black" }}
       >
+        <Toggle />
         <p>Search DOB Records</p>
         <form>
           <Grid
@@ -466,14 +470,8 @@ export default function Search() {
           direction="row"
           alignItems="center"
           justify="center"
-        >
-          <ul>
-            {reqData &&
-              reqData.map((item, i) => {
-                return <li>{JSON.stringify(item)}</li>;
-              })}
-          </ul>
-        </Grid>
+        ></Grid>
+        <Results reqData={reqData} />
       </Container>
     </div>
   );
