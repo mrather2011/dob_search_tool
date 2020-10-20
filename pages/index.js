@@ -25,8 +25,8 @@ export default function Home(props) {
     borough: ["Manhattan"],
     address: {
       streetNumber: "",
-      street: "",
-      zip: "",
+      street: null,
+      zip: null,
     },
     communityBoard: [],
     censusTract: [],
@@ -89,11 +89,14 @@ export default function Home(props) {
       });
   };
 
-  const getValidationData = (select, limit) => {
+  const getValidationData = (select, limit, subLoc) => {
+    let selectCriteria = subLoc ? `${select},${subLoc}` : select;
+    let groupCriteria = subLoc ? `${select},${subLoc}` : select;
     let buildingsRequest = {
       params: {
-        $select: select,
-        $group: select,
+        $select: selectCriteria,
+        $group: groupCriteria,
+
         $limit: limit,
       },
     };
@@ -106,44 +109,61 @@ export default function Home(props) {
       .then((res) => {
         switch (select) {
           case "borough":
-            console.log(res.data);
-            setBorough(res.data);
+            let dataTransform = res.data
+              .map((item, i) => item.borough)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setBorough(dataTransform);
             break;
           case "block":
-            console.log(res.data);
-            setBlock(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.block)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setBlock(dataTransform);
             break;
           case "lot":
-            console.log(res.data);
-            setLot(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.lot)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setLot(dataTransform);
             break;
           case "street_name":
-            console.log(res.data);
-            setStreetName(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.street_name)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setStreetName(dataTransform);
             break;
           case "zip_code":
-            console.log(res.data);
             setZipCode(res.data);
             break;
           case "community_board":
-            console.log(res.data);
             setCommBoard(res.data);
             break;
           case "gis_council_district":
-            console.log(res.data);
             setCouncil(res.data);
             break;
           case "bldg_type":
-            console.log(res.data);
-            setBuildingType(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.bldg_type)
+              .sort((a, b) => (a < b ? 1 : -1));
+            setBuildingType(dataTransform);
             break;
           case "job_type":
-            console.log(res.data);
-            setJobType(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.job_type)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setJobType(dataTransform);
             break;
           case "permit_status":
-            console.log(res.data);
-            setPermitStatus(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.permit_status)
+              .sort((a, b) => (a < b ? 1 : -1));
+
+            setPermitStatus(dataTransform);
             break;
           default:
             return null;
@@ -157,15 +177,16 @@ export default function Home(props) {
     getValidationData("lot", 10);
     getValidationData("borough", 10);
     getValidationData("street_name", 10);
-    getValidationData("zip_code", 10);
-    getValidationData("community_board", 10);
-    getValidationData("gis_council_district", 10);
-    getValidationData("bldg_type", 10);
-    getValidationData("job_type", 10);
-    getValidationData("permit_status", 10);
+    getValidationData("zip_code", 300, "borough");
+    getValidationData("community_board", 200, "borough");
+    getValidationData("gis_council_district", 10000, "borough");
+    getValidationData("bldg_type", 50);
+    getValidationData("job_type", 50);
+    getValidationData("permit_status", 50);
   }, []);
 
-  // console.log("borough", borough);
+  console.log(formData);
+  // console.log("zip", zipCode);
   // console.log("block", block);
   // console.log("lot", lot);
   // console.log("permitStatus", permitStatus);
@@ -203,6 +224,7 @@ export default function Home(props) {
         });
         break;
       case "Street":
+        console.log("streetvalue", e.target.value);
         newAddress = {
           ...formData.address,
           street: e.target.value,
@@ -213,6 +235,7 @@ export default function Home(props) {
         });
         break;
       case "Zip":
+        console.log(e.target.value);
         newAddress = {
           ...formData.address,
           zip: e.target.value,
@@ -312,6 +335,16 @@ export default function Home(props) {
       <Toggle />
 
       <Search
+        commBoard={commBoard}
+        council={council}
+        buildingType={buildingType}
+        jobType={jobType}
+        permitStatus={permitStatus}
+        block={block}
+        lot={lot}
+        borough={borough}
+        zipCode={zipCode}
+        streetName={streetName}
         setReqData={setReqData}
         formData={formData}
         getReqData={getReqData}

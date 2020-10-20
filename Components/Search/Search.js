@@ -22,6 +22,7 @@ import {
   ListSubheader,
   InputLabel,
 } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import { StylesProvider } from "@material-ui/core/styles";
 import axios from "axios";
 
@@ -30,6 +31,16 @@ export default function Search({
   formData,
   getReqData,
   setReqData,
+  commBoard,
+  council,
+  buildingType,
+  jobType,
+  permitStatus,
+  block,
+  lot,
+  borough,
+  zipCode,
+  streetName,
 }) {
   const [expandedView, setExpandedView] = useState(true);
   let hideStyle;
@@ -42,6 +53,7 @@ export default function Search({
   const dateCss = css`
     margin: 0 20px;
   `;
+
   return (
     <StylesProvider injectFirst>
       <div>
@@ -118,21 +130,39 @@ export default function Search({
                   placeholder="Street Number"
                   color="secondary"
                 />
-                <Input
+                <Autocomplete
+                  onSelect={(e) => updateFormData(e, "Street")}
+                  autoSelect
+                  freeSolo
+                  style={{ width: "200px" }}
                   value={formData.address.street}
-                  onChange={(e) => updateFormData(e, "Street")}
-                  type="text"
-                  placeholder="Street Name"
-                  color="secondary"
+                  options={streetName}
+                  getOptionLabel={(option) => (option ? option : "")}
+                  id="flat-demo"
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Street Name"
+                      margin="normal"
+                    />
+                  )}
                 />
 
-                <Input
-                  style={{ maxWidth: "150px", textAlign: "center" }}
-                  value={formData.address.zip}
+                <Autocomplete
                   onChange={(e) => updateFormData(e, "Zip")}
-                  type="number"
-                  placeholder="Zip Code"
-                  color="secondary"
+                  onInputChange={console.log(formData.address.zip)}
+                  freeSolo
+                  autoSelect
+                  style={{ width: "200px" }}
+                  value={formData.address.zip}
+                  options={zipCode}
+                  getOptionLabel={(option) =>
+                    option.zip_code ? option.zip_code : ""
+                  }
+                  id="zip"
+                  renderInput={(params) => (
+                    <TextField {...params} label="Zip Code" margin="normal" />
+                  )}
                 />
               </Grid>
               <Grid
@@ -156,77 +186,86 @@ export default function Search({
                     value={formData.communityBoard}
                   >
                     <ListSubheader>Manhattan</ListSubheader>
-                    {NYCCommunityBoards.map((comm, i) => {
-                      if (comm.toString().slice(0, 1) === "1") {
-                        return (
-                          <MenuItem key={comm} value={comm}>
-                            {comm}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {commBoard
+                      .sort((a, b) => a.community_board - b.community_board)
+                      .map((comm, i) => {
+                        if (comm.borough.toLowerCase() === "manhattan") {
+                          return (
+                            <MenuItem
+                              key={comm.community_board}
+                              value={comm.community_board}
+                            >
+                              {comm.community_board}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Bronx</ListSubheader>
-                    {NYCCommunityBoards.map((comm, i) => {
-                      if (comm.toString().slice(0, 1) === "2") {
-                        return (
-                          <MenuItem key={comm} value={comm}>
-                            {comm}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {commBoard
+                      .sort((a, b) => a.community_board - b.community_board)
+                      .map((comm, i) => {
+                        if (comm.borough.toLowerCase() === "bronx") {
+                          return (
+                            <MenuItem
+                              key={comm.community_board}
+                              value={comm.community_board}
+                            >
+                              {comm.community_board}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Brooklyn</ListSubheader>
-                    {NYCCommunityBoards.map((comm, i) => {
-                      if (comm.toString().slice(0, 1) === "3") {
-                        return (
-                          <MenuItem key={comm} value={comm}>
-                            {comm}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {commBoard
+                      .sort((a, b) => a.community_board - b.community_board)
+                      .map((comm, i) => {
+                        if (comm.borough.toLowerCase() === "brooklyn") {
+                          return (
+                            <MenuItem
+                              key={comm.community_board}
+                              value={comm.community_board}
+                            >
+                              {comm.community_board}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Queens</ListSubheader>
-                    {NYCCommunityBoards.map((comm, i) => {
-                      if (comm.toString().slice(0, 1) === "4") {
-                        return (
-                          <MenuItem key={comm} value={comm}>
-                            {comm}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {commBoard
+                      .sort((a, b) => a.community_board - b.community_board)
+                      .map((comm, i) => {
+                        if (comm.borough.toLowerCase() === "queens") {
+                          return (
+                            <MenuItem
+                              key={comm.community_board}
+                              value={comm.community_board}
+                            >
+                              {comm.community_board}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Staten Island</ListSubheader>
-                    {NYCCommunityBoards.map((comm, i) => {
-                      if (comm.toString().slice(0, 1) === "5") {
-                        return (
-                          <MenuItem key={comm} value={formData.communityBoard}>
-                            {comm}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {commBoard
+                      .sort((a, b) => a.community_board - b.community_board)
+                      .map((comm, i) => {
+                        if (comm.borough.toLowerCase() === "staten island") {
+                          return (
+                            <MenuItem
+                              key={comm.community_board}
+                              value={comm.community_board}
+                            >
+                              {comm.community_board}
+                            </MenuItem>
+                          );
+                        }
+                      })}
                   </Select>
                 </div>
-
-                {/* <div>
-                  <InputLabel>Census Tract</InputLabel>
-                  <Select
-                    onChange={(e) => updateFormData(e, "CensusTract")}
-                    multiple
-                    label="Census Tract"
-                    value={formData.censusTract}
-                  >
-                    <MenuItem value={301}>CT1</MenuItem>
-                    <MenuItem value={401}>CT2</MenuItem>
-                    <MenuItem value={501}>CT3</MenuItem>
-                    <MenuItem value={601}>CT4</MenuItem>
-                    <MenuItem value={701}>CT5</MenuItem>
-                  </Select>
-                </div> */}
 
                 <div>
                   <InputLabel>Council District</InputLabel>
@@ -237,74 +276,99 @@ export default function Search({
                     value={formData.councilDistrict}
                   >
                     <ListSubheader>Manhattan</ListSubheader>
-
-                    {NYCCouncilDistricts.sort((a, b) =>
-                      a.District > b.District ? 1 : -1
-                    ).map((coun, i) => {
-                      if (coun.Borough === "Manhattan") {
-                        return (
-                          <MenuItem key={coun.District} value={coun.District}>
-                            {coun.District}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {council
+                      .sort(
+                        (a, b) =>
+                          a.gis_council_district - b.gis_council_district
+                      )
+                      .map((coun, i) => {
+                        if (coun.borough.toLowerCase() === "manhattan") {
+                          return (
+                            <MenuItem
+                              key={coun.gis_council_district}
+                              value={coun.gis_council_district}
+                            >
+                              {coun.gis_council_district}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Bronx</ListSubheader>
-
-                    {NYCCouncilDistricts.sort((a, b) =>
-                      a.District > b.District ? 1 : -1
-                    ).map((coun, i) => {
-                      if (coun.Borough === "Bronx") {
-                        return (
-                          <MenuItem key={coun.District} value={coun.District}>
-                            {coun.District}
-                          </MenuItem>
-                        );
-                      }
-                    })}
-
-                    <ListSubheader>Queens</ListSubheader>
-
-                    {NYCCouncilDistricts.sort((a, b) =>
-                      a.District > b.District ? 1 : -1
-                    ).map((coun, i) => {
-                      if (coun.Borough === "Queens") {
-                        return (
-                          <MenuItem key={coun.District} value={coun.District}>
-                            {coun.District}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {council
+                      .sort(
+                        (a, b) =>
+                          a.gis_council_district - b.gis_council_district
+                      )
+                      .map((coun, i) => {
+                        if (coun.borough.toLowerCase() === "bronx") {
+                          return (
+                            <MenuItem
+                              key={coun.gis_council_district}
+                              value={coun.gis_council_district}
+                            >
+                              {coun.gis_council_district}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Brooklyn</ListSubheader>
+                    {council
+                      .sort(
+                        (a, b) =>
+                          a.gis_council_district - b.gis_council_district
+                      )
+                      .map((coun, i) => {
+                        if (coun.borough.toLowerCase() === "brooklyn") {
+                          return (
+                            <MenuItem
+                              key={coun.gis_council_district}
+                              value={coun.gis_council_district}
+                            >
+                              {coun.gis_council_district}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
-                    {NYCCouncilDistricts.sort((a, b) =>
-                      a.District > b.District ? 1 : -1
-                    ).map((coun, i) => {
-                      if (coun.Borough === "Brooklyn") {
-                        return (
-                          <MenuItem key={coun.District} value={coun.District}>
-                            {coun.District}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    <ListSubheader>Queens</ListSubheader>
+                    {council
+                      .sort(
+                        (a, b) =>
+                          a.gis_council_district - b.gis_council_district
+                      )
+                      .map((coun, i) => {
+                        if (coun.borough.toLowerCase() === "queens") {
+                          return (
+                            <MenuItem
+                              key={coun.gis_council_district}
+                              value={coun.gis_council_district}
+                            >
+                              {coun.gis_council_district}
+                            </MenuItem>
+                          );
+                        }
+                      })}
 
                     <ListSubheader>Staten Island</ListSubheader>
-
-                    {NYCCouncilDistricts.sort((a, b) =>
-                      a.District > b.District ? 1 : -1
-                    ).map((coun, i) => {
-                      if (coun.Borough === "Staten Island") {
-                        return (
-                          <MenuItem key={coun.District} value={coun.District}>
-                            {coun.District}
-                          </MenuItem>
-                        );
-                      }
-                    })}
+                    {council
+                      .sort(
+                        (a, b) =>
+                          a.gis_council_district - b.gis_council_district
+                      )
+                      .map((coun, i) => {
+                        if (coun.borough.toLowerCase() === "staten island") {
+                          return (
+                            <MenuItem
+                              key={coun.gis_council_district}
+                              value={coun.gis_council_district}
+                            >
+                              {coun.gis_council_district}
+                            </MenuItem>
+                          );
+                        }
+                      })}
                   </Select>
                 </div>
               </Grid>
@@ -327,11 +391,11 @@ export default function Search({
                     label="Building Type"
                     value={formData.buildingType}
                   >
-                    <MenuItem value={47}>House</MenuItem>
-                    <MenuItem value={57}>MultiFam</MenuItem>
-                    <MenuItem value={67}>Warehouse</MenuItem>
-                    <MenuItem value={77}>Garage</MenuItem>
-                    <MenuItem value={87}>Office</MenuItem>
+                    {buildingType
+                      .sort((a, b) => a - b)
+                      .map((item, i) => {
+                        return <MenuItem value={item}>{item}</MenuItem>;
+                      })}
                   </Select>
                 </div>
 
@@ -343,11 +407,9 @@ export default function Search({
                     label="Job Type"
                     value={formData.jobType}
                   >
-                    <MenuItem value={47}>New Build</MenuItem>
-                    <MenuItem value={57}>A2</MenuItem>
-                    <MenuItem value={67}>Light Work</MenuItem>
-                    <MenuItem value={77}>Demo</MenuItem>
-                    <MenuItem value={87}>No Work</MenuItem>
+                    {jobType.sort().map((item, i) => {
+                      return <MenuItem value={item}>{item}</MenuItem>;
+                    })}
                   </Select>
                 </div>
 
@@ -359,11 +421,9 @@ export default function Search({
                     label="Permit Status"
                     value={formData.permitStatus}
                   >
-                    <MenuItem value={47}>ISSUED</MenuItem>
-                    <MenuItem value={57}>DENIED</MenuItem>
-                    <MenuItem value={67}>UNDER REVIEW</MenuItem>
-                    <MenuItem value={77}>OTHER</MenuItem>
-                    <MenuItem value={87}>NO IDEA</MenuItem>
+                    {permitStatus.sort().map((item, i) => {
+                      return <MenuItem value={item}>{item}</MenuItem>;
+                    })}
                   </Select>
                 </div>
               </Grid>
