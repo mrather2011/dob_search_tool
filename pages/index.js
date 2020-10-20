@@ -11,7 +11,16 @@ export default function Home(props) {
     "X-App-Token": process.env.API_TOKEN,
   });
   const [params, setParams] = useState(null);
-  const [validator, setValidator] = useState([]);
+  const [borough, setBorough] = useState([]);
+  const [block, setBlock] = useState([]);
+  const [lot, setLot] = useState([]);
+  const [streetName, setStreetName] = useState([]);
+  const [zipCode, setZipCode] = useState([]);
+  const [commBoard, setCommBoard] = useState([]);
+  const [council, setCouncil] = useState([]);
+  const [buildingType, setBuildingType] = useState([]);
+  const [jobType, setJobType] = useState([]);
+  const [permitStatus, setPermitStatus] = useState([]);
   const [formData, setFormData] = useState({
     borough: ["Manhattan"],
     address: {
@@ -49,7 +58,7 @@ export default function Home(props) {
   let request = {
     params: {
       $where: "borough='MANHATTAN' OR borough='BROOKLYN'",
-      $limit: 100,
+      $limit: 10,
     },
   };
 
@@ -95,20 +104,72 @@ export default function Home(props) {
         buildingsRequest
       )
       .then((res) => {
-        console.log(buildingsRequest.params.$select);
-        setValidator({
-          ...validator,
-          borough: res.data,
-        });
+        switch (select) {
+          case "borough":
+            console.log(res.data);
+            setBorough(res.data);
+            break;
+          case "block":
+            console.log(res.data);
+            setBlock(res.data);
+            break;
+          case "lot":
+            console.log(res.data);
+            setLot(res.data);
+            break;
+          case "street_name":
+            console.log(res.data);
+            setStreetName(res.data);
+            break;
+          case "zip_code":
+            console.log(res.data);
+            setZipCode(res.data);
+            break;
+          case "community_board":
+            console.log(res.data);
+            setCommBoard(res.data);
+            break;
+          case "gis_council_district":
+            console.log(res.data);
+            setCouncil(res.data);
+            break;
+          case "bldg_type":
+            console.log(res.data);
+            setBuildingType(res.data);
+            break;
+          case "job_type":
+            console.log(res.data);
+            setJobType(res.data);
+            break;
+          case "permit_status":
+            console.log(res.data);
+            setPermitStatus(res.data);
+            break;
+          default:
+            return null;
+        }
       })
       .catch((err) => console.log(err));
   };
 
   useEffect(() => {
+    getValidationData("block", 10);
+    getValidationData("lot", 10);
     getValidationData("borough", 10);
+    getValidationData("street_name", 10);
+    getValidationData("zip_code", 10);
+    getValidationData("community_board", 10);
+    getValidationData("gis_council_district", 10);
+    getValidationData("bldg_type", 10);
+    getValidationData("job_type", 10);
+    getValidationData("permit_status", 10);
   }, []);
 
-  console.log(validator);
+  // console.log("borough", borough);
+  // console.log("block", block);
+  // console.log("lot", lot);
+  // console.log("permitStatus", permitStatus);
+  // console.log("job type", jobType);
 
   const updateFormData = (e, id) => {
     e.preventDefault();
@@ -249,6 +310,7 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Toggle />
+
       <Search
         setReqData={setReqData}
         formData={formData}
