@@ -57,21 +57,31 @@ export default function Home(props) {
   const updateWhereCriteria = (formInfo, searchKey) => {
     let updateHelper;
 
-    if (formInfo && searchKey === "issuance_date") {
+    if (formInfo && searchKey === "issuance_date_start") {
       let dateHelper = [];
-      dateHelper = Object.values(formData.permitIssueDate);
-      if (dateHelper.length > 1) {
-        if (dateHelper[0]) {
-          updateHelper = `${searchKey}>='${formInfo}' `;
-        } else if (dateHelper[1]) {
-          updateHelper = `${searchKey}<='${formInfo}' `;
-        }
-      } else if (formInfo) {
-        updateHelper = `${searchKey}='${formInfo}' `;
-      }
-      console.log(dateHelper);
-    }
-    if (formInfo && typeof formInfo !== "undefined" && formInfo.length > 0) {
+      dateHelper = `issuance_date>='${formData.permitIssueDate.start}' `;
+      updateHelper = dateHelper;
+      whereArray.push(updateHelper);
+    } else if (formInfo && searchKey === "issuance_date_end") {
+      let dateHelper = [];
+      dateHelper = `issuance_date<='${formData.permitIssueDate.end}' `;
+      updateHelper = dateHelper;
+      whereArray.push(updateHelper);
+    } else if (formInfo && searchKey === "filing_date_start") {
+      let dateHelper = [];
+      dateHelper = `filing_date>='${formData.filingIssueDate.start}' `;
+      updateHelper = dateHelper;
+      whereArray.push(updateHelper);
+    } else if (formInfo && searchKey === "filing_date_end") {
+      let dateHelper = [];
+      dateHelper = `filing_date<='${formData.filingIssueDate.end}' `;
+      updateHelper = dateHelper;
+      whereArray.push(updateHelper);
+    } else if (
+      formInfo &&
+      typeof formInfo !== "undefined" &&
+      formInfo.length > 0
+    ) {
       if (typeof formInfo === "object" || typeof formInfo === "array") {
         updateHelper = formInfo
           .map((item, i) => {
@@ -97,13 +107,13 @@ export default function Home(props) {
     updateWhereCriteria(formData.buildingType, "bldg_type");
     updateWhereCriteria(formData.jobType, "job_type");
     updateWhereCriteria(formData.permitStatus, "permit_status");
-    updateWhereCriteria(formData.permitIssueDate.start, "issuance_date");
-    updateWhereCriteria(formData.permitIssueDate.end, "issuance_date");
-    updateWhereCriteria(formData.filingIssueDate.start, "filing_date");
-    updateWhereCriteria(formData.filingIssueDate.end, "filing_date");
+    updateWhereCriteria(formData.permitIssueDate.start, "issuance_date_start");
+    updateWhereCriteria(formData.permitIssueDate.end, "issuance_date_end");
+    updateWhereCriteria(formData.filingIssueDate.start, "filing_date_start");
+    updateWhereCriteria(formData.filingIssueDate.end, "filing_date_end");
 
     exportArray = whereArray.map((item, i) => {
-      if (item.includes("OR")) {
+      if (item && item.includes("OR")) {
         return `(${item})`;
       } else {
         return item;
@@ -118,8 +128,6 @@ export default function Home(props) {
   updateAllWhereCriteria();
 
   console.log("export array", exportArray);
-  console.log("typeof export", typeof exportArray);
-  console.log("formData", formData);
 
   let request = {
     params: {
