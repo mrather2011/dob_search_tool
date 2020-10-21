@@ -88,11 +88,13 @@ export default function Search({
                 label="Borough"
                 value={formData.borough}
               >
-                <MenuItem value="Manhattan">Manhattan</MenuItem>
-                <MenuItem value="Brooklyn">Brooklyn</MenuItem>
-                <MenuItem value="Queens">Queens</MenuItem>
-                <MenuItem value="Bronx">Bronx</MenuItem>
-                <MenuItem value="Staten Island">Staten Island</MenuItem>
+                {borough.sort().map((item, i) => {
+                  return (
+                    <MenuItem key={item} value={item}>
+                      {item}
+                    </MenuItem>
+                  );
+                })}
               </Select>
 
               <Input
@@ -149,16 +151,13 @@ export default function Search({
                 />
 
                 <Autocomplete
-                  onChange={(e) => updateFormData(e, "Zip")}
-                  onInputChange={console.log(formData.address.zip)}
+                  onSelect={(e) => updateFormData(e, "Zip")}
                   freeSolo
                   autoSelect
                   style={{ width: "200px" }}
                   value={formData.address.zip}
                   options={zipCode}
-                  getOptionLabel={(option) =>
-                    option.zip_code ? option.zip_code : ""
-                  }
+                  getOptionLabel={(option) => (option ? option : "")}
                   id="zip"
                   renderInput={(params) => (
                     <TextField {...params} label="Zip Code" margin="normal" />

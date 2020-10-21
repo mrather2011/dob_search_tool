@@ -49,32 +49,97 @@ export default function Home(props) {
     setReqData();
   };
 
-  let boroughSearchParam = new URLSearchParams();
-  boroughSearchParam.append(
-    "$where",
-    "borough='MANHATTAN' OR borough='BROOKLYN'"
-  );
+  let whereArray = [];
+
+  let boroughSearch =
+    formData.borough &&
+    formData.borough
+      .map((item, i) => {
+        return `borough='${item}'`;
+      })
+      .join(formData.borough.length > 1 ? "OR " : "");
+  whereArray.push(boroughSearch);
+
+  let blockSearch =
+    formData.block &&
+    formData.block
+      .map((item, i) => {
+        return `block='${item}'`;
+      })
+      .join(formData.block.length > 1 ? "OR " : "");
+  whereArray.push(blockSearch);
+
+  let lotSearch =
+    formData.lot &&
+    formData.lot
+      .map((item, i) => {
+        return `lot='${item}'`;
+      })
+      .join(formData.lot.length > 1 ? "OR " : "");
+  whereArray.push(lotSearch);
+
+  let streetNameSearch =
+    formData.address.street &&
+    formData.address.street
+      .map((item, i) => {
+        return `street_name='${item}'`;
+      })
+      .join(formData.address.street.length > 1 ? "OR " : "");
+  whereArray.push(streetNameSearch);
+
+  let zipSearch =
+    formData.address.zip &&
+    formData.address.zip
+      .map((item, i) => {
+        return `zip_code='${item}'`;
+      })
+      .join(formData.address.zip.length > 1 ? "OR " : "");
+  whereArray.push(zipSearch);
+
+  let communityBoardSearch =
+    formData.communityBoard &&
+    formData.communityBoard
+      .map((item, i) => {
+        return `community_board='${item}'`;
+      })
+      .join(formData.communityBoard.length > 1 ? "OR " : "");
+  whereArray.push(communityBoardSearch);
+
+  let councilDistrictSearch =
+    formData.councilDistrict &&
+    formData.councilDistrict
+      .map((item, i) => {
+        return `gis_council_district='${item}'`;
+      })
+      .join(formData.councilDistrict.length > 1 ? "OR " : "");
+  whereArray.push(councilDistrictSearch);
+
+  let buildingTypeSearch =
+    formData.buildingType &&
+    formData.buildingType
+      .map((item, i) => {
+        return `bldg_type='${item}'`;
+      })
+      .join(formData.buildingType.length > 1 ? "OR " : "");
+  whereArray.push(buildingTypeSearch);
+
+  console.log(whereArray);
 
   let request = {
     params: {
-      $where: "borough='MANHATTAN' OR borough='BROOKLYN'",
-      $limit: 10,
-    },
-  };
+      $where: boroughSearch,
 
-  const setParamsHandler = () => {
-    setParams({
-      boroughSearchParam,
-    });
+      $limit: 100,
+    },
   };
 
   const dateFormatHandler = (date) => {
     let dateFormat = moment(date).format("MM/DD/YYYY");
   };
 
-  useEffect(() => {
-    setParamsHandler();
-  }, [reqData]);
+  // useEffect(() => {
+  //   setParamsHandler();
+  // }, [reqData]);
 
   const getReqData = (e) => {
     e.preventDefault();
@@ -132,12 +197,15 @@ export default function Home(props) {
           case "street_name":
             dataTransform = res.data
               .map((item, i) => item.street_name)
-              .sort((a, b) => (a < b ? 1 : -1));
+              .sort((a, b) => a - b);
 
             setStreetName(dataTransform);
             break;
           case "zip_code":
-            setZipCode(res.data);
+            dataTransform = res.data
+              .map((item, i) => item.zip_code)
+              .sort((a, b) => a - b);
+            setZipCode(dataTransform);
             break;
           case "community_board":
             setCommBoard(res.data);
@@ -185,7 +253,7 @@ export default function Home(props) {
     getValidationData("permit_status", 50);
   }, []);
 
-  console.log(formData);
+  // console.log(formData);
   // console.log("zip", zipCode);
   // console.log("block", block);
   // console.log("lot", lot);
@@ -224,7 +292,6 @@ export default function Home(props) {
         });
         break;
       case "Street":
-        console.log("streetvalue", e.target.value);
         newAddress = {
           ...formData.address,
           street: e.target.value,
@@ -235,7 +302,6 @@ export default function Home(props) {
         });
         break;
       case "Zip":
-        console.log(e.target.value);
         newAddress = {
           ...formData.address,
           zip: e.target.value,
