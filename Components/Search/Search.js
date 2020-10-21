@@ -393,7 +393,11 @@ export default function Search({
                     {buildingType
                       .sort((a, b) => a - b)
                       .map((item, i) => {
-                        return <MenuItem value={item}>{item}</MenuItem>;
+                        return (
+                          <MenuItem key={item} value={item}>
+                            {item}
+                          </MenuItem>
+                        );
                       })}
                   </Select>
                 </div>
@@ -407,7 +411,11 @@ export default function Search({
                     value={formData.jobType}
                   >
                     {jobType.sort().map((item, i) => {
-                      return <MenuItem value={item}>{item}</MenuItem>;
+                      return (
+                        <MenuItem key={item} value={item}>
+                          {item}
+                        </MenuItem>
+                      );
                     })}
                   </Select>
                 </div>
@@ -421,7 +429,11 @@ export default function Search({
                     value={formData.permitStatus}
                   >
                     {permitStatus.sort().map((item, i) => {
-                      return <MenuItem value={item}>{item}</MenuItem>;
+                      return (
+                        <MenuItem key={item} value={item}>
+                          {item}
+                        </MenuItem>
+                      );
                     })}
                   </Select>
                 </div>

@@ -22,11 +22,13 @@ export default function Home(props) {
   const [jobType, setJobType] = useState([]);
   const [permitStatus, setPermitStatus] = useState([]);
   const [formData, setFormData] = useState({
-    borough: ["Manhattan"],
+    borough: ["MANHATTAN"],
+    block: "",
+    lot: "",
     address: {
-      streetNumber: "",
-      street: null,
-      zip: null,
+      streetNumber: [],
+      street: [],
+      zip: [],
     },
     communityBoard: [],
     censusTract: [],
@@ -50,84 +52,78 @@ export default function Home(props) {
   };
 
   let whereArray = [];
+  let exportArray = [];
 
-  let boroughSearch =
-    formData.borough &&
-    formData.borough
-      .map((item, i) => {
-        return `borough='${item}'`;
-      })
-      .join(formData.borough.length > 1 ? "OR " : "");
-  whereArray.push(boroughSearch);
+  const updateWhereCriteria = (formInfo, searchKey) => {
+    let updateHelper;
 
-  let blockSearch =
-    formData.block &&
-    formData.block
-      .map((item, i) => {
-        return `block='${item}'`;
-      })
-      .join(formData.block.length > 1 ? "OR " : "");
-  whereArray.push(blockSearch);
+    if (formInfo && searchKey === "issuance_date") {
+      let dateHelper = [];
+      dateHelper = Object.values(formData.permitIssueDate);
+      if (dateHelper.length > 1) {
+        if (dateHelper[0]) {
+          updateHelper = `${searchKey}>='${formInfo}' `;
+        } else if (dateHelper[1]) {
+          updateHelper = `${searchKey}<='${formInfo}' `;
+        }
+      } else if (formInfo) {
+        updateHelper = `${searchKey}='${formInfo}' `;
+      }
+      console.log(dateHelper);
+    }
+    if (formInfo && typeof formInfo !== "undefined" && formInfo.length > 0) {
+      if (typeof formInfo === "object" || typeof formInfo === "array") {
+        updateHelper = formInfo
+          .map((item, i) => {
+            return `${searchKey}='${item}' `;
+          })
+          .join(formInfo.length > 1 && "OR ");
+      } else if (formInfo) {
+        updateHelper = `${searchKey}='${formInfo}' `;
+      }
+      whereArray.push(updateHelper);
+    }
+  };
 
-  let lotSearch =
-    formData.lot &&
-    formData.lot
-      .map((item, i) => {
-        return `lot='${item}'`;
-      })
-      .join(formData.lot.length > 1 ? "OR " : "");
-  whereArray.push(lotSearch);
+  const updateAllWhereCriteria = (formInfo, searchKey) => {
+    updateWhereCriteria(formData.borough, "borough");
+    updateWhereCriteria(formData.block, "block");
+    updateWhereCriteria(formData.lot, "lot");
+    updateWhereCriteria(formData.address.streetNumber, "house__");
+    updateWhereCriteria(formData.address.street, "street_name");
+    updateWhereCriteria(formData.address.zip, "zip_code");
+    updateWhereCriteria(formData.communityBoard, "community_board");
+    updateWhereCriteria(formData.councilDistrict, "gis_council_district");
+    updateWhereCriteria(formData.buildingType, "bldg_type");
+    updateWhereCriteria(formData.jobType, "job_type");
+    updateWhereCriteria(formData.permitStatus, "permit_status");
+    updateWhereCriteria(formData.permitIssueDate.start, "issuance_date");
+    updateWhereCriteria(formData.permitIssueDate.end, "issuance_date");
+    updateWhereCriteria(formData.filingIssueDate.start, "filing_date");
+    updateWhereCriteria(formData.filingIssueDate.end, "filing_date");
 
-  let streetNameSearch =
-    formData.address.street &&
-    formData.address.street
-      .map((item, i) => {
-        return `street_name='${item}'`;
-      })
-      .join(formData.address.street.length > 1 ? "OR " : "");
-  whereArray.push(streetNameSearch);
+    exportArray = whereArray.map((item, i) => {
+      if (item.includes("OR")) {
+        return `(${item})`;
+      } else {
+        return item;
+      }
+    });
 
-  let zipSearch =
-    formData.address.zip &&
-    formData.address.zip
-      .map((item, i) => {
-        return `zip_code='${item}'`;
-      })
-      .join(formData.address.zip.length > 1 ? "OR " : "");
-  whereArray.push(zipSearch);
+    if (exportArray.length > 1) {
+      exportArray = exportArray.join(" AND ");
+    }
+  };
 
-  let communityBoardSearch =
-    formData.communityBoard &&
-    formData.communityBoard
-      .map((item, i) => {
-        return `community_board='${item}'`;
-      })
-      .join(formData.communityBoard.length > 1 ? "OR " : "");
-  whereArray.push(communityBoardSearch);
+  updateAllWhereCriteria();
 
-  let councilDistrictSearch =
-    formData.councilDistrict &&
-    formData.councilDistrict
-      .map((item, i) => {
-        return `gis_council_district='${item}'`;
-      })
-      .join(formData.councilDistrict.length > 1 ? "OR " : "");
-  whereArray.push(councilDistrictSearch);
-
-  let buildingTypeSearch =
-    formData.buildingType &&
-    formData.buildingType
-      .map((item, i) => {
-        return `bldg_type='${item}'`;
-      })
-      .join(formData.buildingType.length > 1 ? "OR " : "");
-  whereArray.push(buildingTypeSearch);
-
-  console.log(whereArray);
+  console.log("export array", exportArray);
+  console.log("typeof export", typeof exportArray);
+  console.log("formData", formData);
 
   let request = {
     params: {
-      $where: boroughSearch,
+      $where: exportArray.length === 1 ? exportArray.shift() : exportArray,
 
       $limit: 100,
     },
