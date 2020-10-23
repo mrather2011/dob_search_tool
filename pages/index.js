@@ -5,6 +5,7 @@ import Results from "../Components/Results/Results";
 import Toggle from "../Components/Toggle";
 import axios from "axios";
 import moment from "moment";
+import Geocode from "react-geocode";
 
 export default function Home(props) {
   const [reqHeader, setReqHeader] = useState({
@@ -14,7 +15,7 @@ export default function Home(props) {
   const [borough, setBorough] = useState([]);
   const [block, setBlock] = useState([]);
   const [lot, setLot] = useState([]);
-  const [streetName, setStreetName] = useState([]);
+
   const [zipCode, setZipCode] = useState([]);
   const [commBoard, setCommBoard] = useState([]);
   const [council, setCouncil] = useState([]);
@@ -25,11 +26,12 @@ export default function Home(props) {
     borough: ["MANHATTAN"],
     block: "",
     lot: "",
-    address: {
-      streetNumber: [],
-      street: [],
-      zip: [],
-    },
+    address: "",
+    street_number: "",
+    street_name: "",
+    zip_code: "",
+    gis_latitude: "",
+    gis_longitude: "",
     communityBoard: [],
     censusTract: [],
     councilDistrict: [],
@@ -56,8 +58,15 @@ export default function Home(props) {
 
   const updateWhereCriteria = (formInfo, searchKey) => {
     let updateHelper;
+    console.log(formInfo.length);
 
-    if (formInfo && searchKey === "issuance_date_start") {
+    if (
+      (formInfo && searchKey === "gis_latitude") ||
+      (formInfo && searchKey === "gis_longitude")
+    ) {
+      updateHelper = `${searchKey} INCLUDES(':${formInfo}')`;
+      whereArray.push(updateHelper);
+    } else if (formInfo && searchKey === "issuance_date_start") {
       let dateHelper = [];
       dateHelper = `issuance_date>='${formData.permitIssueDate.start}' `;
       updateHelper = dateHelper;
@@ -88,7 +97,7 @@ export default function Home(props) {
             return `${searchKey}='${item}' `;
           })
           .join(formInfo.length > 1 && "OR ");
-      } else if (formInfo) {
+      } else {
         updateHelper = `${searchKey}='${formInfo}' `;
       }
       whereArray.push(updateHelper);
@@ -99,9 +108,9 @@ export default function Home(props) {
     updateWhereCriteria(formData.borough, "borough");
     updateWhereCriteria(formData.block, "block");
     updateWhereCriteria(formData.lot, "lot");
-    updateWhereCriteria(formData.address.streetNumber, "house__");
-    updateWhereCriteria(formData.address.street, "street_name");
-    updateWhereCriteria(formData.address.zip, "zip_code");
+    updateWhereCriteria(formData.street_name, "street_name");
+    updateWhereCriteria(formData.street_number, "house__");
+    updateWhereCriteria(formData.zip_code, "zip_code");
     updateWhereCriteria(formData.communityBoard, "community_board");
     updateWhereCriteria(formData.councilDistrict, "gis_council_district");
     updateWhereCriteria(formData.buildingType, "bldg_type");
@@ -127,7 +136,9 @@ export default function Home(props) {
 
   updateAllWhereCriteria();
 
+  console.log("where array", whereArray);
   console.log("export array", exportArray);
+  console.log("formdata", formData);
 
   let request = {
     params: {
@@ -141,12 +152,45 @@ export default function Home(props) {
     let dateFormat = moment(date).format("MM/DD/YYYY");
   };
 
-  // useEffect(() => {
-  //   setParamsHandler();
-  // }, [reqData]);
+  const getAddressFromGeo = (address) => {
+    Geocode.setApiKey(process.env.NEXT_PUBLIC_APIKey);
+    Geocode.setLanguage("en");
+    Geocode.setRegion("en");
+
+    if (!address) {
+      setFormData({
+        ...formData,
+        address: "",
+        gis_longitude: "",
+        gis_latitude: "",
+      });
+    } else if (address && typeof address !== "undefined") {
+      Geocode.fromAddress(address)
+        .then((res) => {
+          console.log(res.results[0]);
+          setFormData({
+            ...formData,
+            address: res.results[0].formatted_address,
+            street_name: res.results[0].address_components[1].short_name.toUpperCase(),
+            street_number: res.results[0].address_components[0].short_name.toString(),
+            zip_code: res.results[0].address_components[7].short_name.toString(),
+          });
+        })
+        .catch((err) => {
+          setFormData({
+            ...formData,
+            address: "",
+            gis_longitude: "",
+            gis_latitude: "",
+          });
+          console.log(err);
+        });
+    }
+  };
 
   const getReqData = (e) => {
     e.preventDefault();
+
     axios
       .get("https://data.cityofnewyork.us/resource/ipu4-2q9a.json", request)
       .then((res) => {
@@ -198,19 +242,7 @@ export default function Home(props) {
 
             setLot(dataTransform);
             break;
-          case "street_name":
-            dataTransform = res.data
-              .map((item, i) => item.street_name)
-              .sort((a, b) => a - b);
 
-            setStreetName(dataTransform);
-            break;
-          case "zip_code":
-            dataTransform = res.data
-              .map((item, i) => item.zip_code)
-              .sort((a, b) => a - b);
-            setZipCode(dataTransform);
-            break;
           case "community_board":
             setCommBoard(res.data);
             break;
@@ -248,8 +280,7 @@ export default function Home(props) {
     getValidationData("block", 10);
     getValidationData("lot", 10);
     getValidationData("borough", 10);
-    getValidationData("street_name", 10);
-    getValidationData("zip_code", 300, "borough");
+
     getValidationData("community_board", 200, "borough");
     getValidationData("gis_council_district", 10000, "borough");
     getValidationData("bldg_type", 50);
@@ -286,35 +317,12 @@ export default function Home(props) {
         });
         break;
       case "StreetNumber":
-        let newAddress = {
-          ...formData.address,
-          streetNumber: e.target.value,
-        };
         setFormData({
           ...formData,
-          address: newAddress,
+          address: e.target.value,
         });
         break;
-      case "Street":
-        newAddress = {
-          ...formData.address,
-          street: e.target.value,
-        };
-        setFormData({
-          ...formData,
-          address: newAddress,
-        });
-        break;
-      case "Zip":
-        newAddress = {
-          ...formData.address,
-          zip: e.target.value,
-        };
-        setFormData({
-          ...formData,
-          address: newAddress,
-        });
-        break;
+
       case "CommunityBoard":
         setFormData({
           ...formData,
@@ -405,6 +413,7 @@ export default function Home(props) {
       <Toggle />
 
       <Search
+        getAddressFromGeo={getAddressFromGeo}
         commBoard={commBoard}
         council={council}
         buildingType={buildingType}
@@ -414,7 +423,6 @@ export default function Home(props) {
         lot={lot}
         borough={borough}
         zipCode={zipCode}
-        streetName={streetName}
         setReqData={setReqData}
         formData={formData}
         getReqData={getReqData}

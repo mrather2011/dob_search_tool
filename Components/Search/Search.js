@@ -40,7 +40,7 @@ export default function Search({
   lot,
   borough,
   zipCode,
-  streetName,
+  getAddressFromGeo,
 }) {
   const [expandedView, setExpandedView] = useState(true);
   let hideStyle;
@@ -122,46 +122,16 @@ export default function Search({
                 }}
                 direction="row"
                 alignItems="center"
-                justify="space-between"
+                justify="center"
               >
                 <Input
-                  style={{ maxWidth: "100px", textAlign: "center" }}
-                  value={formData.address.streetNumber}
+                  style={{ width: "400px", textAlign: "center" }}
+                  value={formData.address}
                   onChange={(e) => updateFormData(e, "StreetNumber")}
-                  type="number"
-                  placeholder="Street Number"
+                  onBlur={() => getAddressFromGeo(formData.address)}
+                  type="text"
+                  placeholder="Address"
                   color="secondary"
-                />
-                <Autocomplete
-                  onSelect={(e) => updateFormData(e, "Street")}
-                  autoSelect
-                  freeSolo
-                  style={{ width: "200px" }}
-                  value={formData.address.street}
-                  options={streetName}
-                  getOptionLabel={(option) => (option ? option : "")}
-                  id="flat-demo"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Street Name"
-                      margin="normal"
-                    />
-                  )}
-                />
-
-                <Autocomplete
-                  onSelect={(e) => updateFormData(e, "Zip")}
-                  freeSolo
-                  autoSelect
-                  style={{ width: "200px" }}
-                  value={formData.address.zip}
-                  options={zipCode}
-                  getOptionLabel={(option) => (option ? option : "")}
-                  id="zip"
-                  renderInput={(params) => (
-                    <TextField {...params} label="Zip Code" margin="normal" />
-                  )}
                 />
               </Grid>
               <Grid
@@ -522,7 +492,11 @@ export default function Search({
               >
                 Submit
               </Button>
-              <Button onClick={setReqData} variant="outlined" color="secondary">
+              <Button
+                onClick={() => getAddressFromGeo(formData.address)}
+                variant="outlined"
+                color="secondary"
+              >
                 Clear Results
               </Button>
             </Grid>
