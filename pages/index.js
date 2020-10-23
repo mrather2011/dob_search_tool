@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Search from "../Components/Search/Search";
 import Results from "../Components/Results/Results";
-import Toggle from "../Components/Toggle";
 import axios from "axios";
 import moment from "moment";
 import Geocode from "react-geocode";
@@ -15,7 +14,7 @@ export default function Home(props) {
   const [borough, setBorough] = useState([]);
   const [block, setBlock] = useState([]);
   const [lot, setLot] = useState([]);
-
+  const [disableButton, setDisableButton] = useState(false);
   const [zipCode, setZipCode] = useState([]);
   const [commBoard, setCommBoard] = useState([]);
   const [council, setCouncil] = useState([]);
@@ -50,15 +49,31 @@ export default function Home(props) {
   const [reqData, setReqData] = useState(null);
 
   const clearResultsHandler = () => {
-    setReqData();
+    setReqData(null);
   };
+
+  const disableButtonHandler = () => {
+    if (formData.address && !disableButton) {
+      setDisableButton(true);
+    } else if (
+      (disableButton && formData.street_name) ||
+      (disableButton && !formData.address)
+    ) {
+      setDisableButton(false);
+    }
+  };
+
+  useEffect(() => {
+    disableButtonHandler();
+
+    console.log(disableButton);
+  }, [formData.address]);
 
   let whereArray = [];
   let exportArray = [];
 
   const updateWhereCriteria = (formInfo, searchKey) => {
     let updateHelper;
-    console.log(formInfo.length);
 
     if (
       (formInfo && searchKey === "gis_latitude") ||
@@ -152,6 +167,18 @@ export default function Home(props) {
     let dateFormat = moment(date).format("MM/DD/YYYY");
   };
 
+  const clearGetAddress = () => {
+    if (formData.address) {
+      setFormData({
+        ...formData,
+        address: "",
+        street_name: "",
+        street_number: "",
+        zip_code: "",
+      });
+    }
+  };
+
   const getAddressFromGeo = (address) => {
     Geocode.setApiKey(process.env.NEXT_PUBLIC_APIKey);
     Geocode.setLanguage("en");
@@ -161,8 +188,9 @@ export default function Home(props) {
       setFormData({
         ...formData,
         address: "",
-        gis_longitude: "",
-        gis_latitude: "",
+        street_name: "",
+        street_number: "",
+        zip_code: "",
       });
     } else if (address && typeof address !== "undefined") {
       Geocode.fromAddress(address)
@@ -405,14 +433,16 @@ export default function Home(props) {
   };
 
   return (
-    <div>
+    <div style={{ marginTop: "50px" }}>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>NYC DOB Search</title>
       </Head>
-      <Toggle />
 
       <Search
+        clearResultsHandler={clearResultsHandler}
+        clearGetAddress={clearGetAddress}
+        disableButtonHandler={disableButtonHandler}
+        disableButton={disableButton}
         getAddressFromGeo={getAddressFromGeo}
         commBoard={commBoard}
         council={council}

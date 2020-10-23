@@ -1,15 +1,14 @@
 /** @jsx jsx */
 import React, { useState, useEffect } from "react";
-import Head from "next/head";
-import Results from "../Results/Results";
-import Toggle from "../Toggle";
+
 import { jsx, css } from "@emotion/core";
 import {
-  allNYCZipCodes,
-  NYCCommunityBoards,
-  NYCCouncilDistricts,
-} from "./criteria";
-
+  breakpoint780,
+  breakpoint640,
+  breakpoint500,
+  breakpoint400,
+  breakpoint300,
+} from "../../styles/breakpoints.js";
 import {
   Container,
   Grid,
@@ -24,7 +23,6 @@ import {
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { StylesProvider } from "@material-ui/core/styles";
-import axios from "axios";
 
 export default function Search({
   updateFormData,
@@ -41,113 +39,222 @@ export default function Search({
   borough,
   zipCode,
   getAddressFromGeo,
+  disableButtonHandler,
+  disableButton,
+  clearGetAddress,
+  clearResultsHandler,
 }) {
-  const [expandedView, setExpandedView] = useState(true);
+  const [expandedView, setExpandedView] = useState(false);
+  let hideHeight = "auto";
   let hideStyle;
-  let containerHeight = "500px";
+  let containerHeight = "600px";
+  let innerGridHeight = "50px";
+  let innerGridOpacity = "1";
   if (!expandedView) {
     hideStyle = "none";
-    containerHeight = "200px";
+    hideHeight = "0px";
+    containerHeight = "225px";
+    innerGridHeight = "1px";
+    innerGridOpacity = "0";
   }
 
+  const containerCss = css`
+    height: ${containerHeight};
+    border: 1px solid black;
+    transition: all 0.3s ease-in-out;
+
+    @media (max-width: 560px) {
+      height: ${expandedView ? `750px` : containerHeight};
+    }
+
+    @media (max-width: 400px) {
+      height: ${expandedView ? `775px` : containerHeight};
+    }
+
+    @media (max-width: 305px) {
+      height: ${expandedView ? `775px` : `275px`};
+    }
+
+    p {
+      text-align: center;
+      font-size: 1.5rem;
+      padding: 0;
+      margin: 0;
+    }
+  `;
+
+  const expandButton = css`
+    position: relative;
+    left: 0;
+
+    @media (max-width: ${breakpoint640}) {
+      right: 0;
+    }
+  `;
+
+  const hideContainer = css`
+    display: ${hideStyle};
+    height: ${hideHeight};
+    opacity: ${innerGridOpacity};
+    transition: all 0.3s ease-in-out;
+  `;
   const dateCss = css`
     margin: 0 20px;
+  `;
+
+  const innerGridCss = css`
+    position: relative;
+    padding: 0 100px;
+    width: 100%;
+    margin-bottom: 25px;
+
+    transition: all 0.8s ease-in-out;
+
+    @media (max-width: ${breakpoint780}px) {
+      padding: 0 50px;
+    }
+
+    @media (max-width: ${breakpoint500}px) {
+      padding: 0px;
+    }
+  `;
+
+  const addressCss = css`
+    width: 80%;
+    textalign: center;
+
+    @media (max-width: ${breakpoint500}px) {
+      width: 100%;
+    }
+  `;
+
+  const buttonContainerCss = css`
+    height: 100px;
+    padding: 0 100px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-content: flex-start;
+
+    @media (max-width: ${breakpoint780}px) {
+      padding: 0 50px;
+    }
+
+    @media (max-width: ${breakpoint500}px) {
+      justify-content: space-around;
+      padding: 0;
+    }
+
+    button {
+      margin: 0 50px;
+
+      @media (max-width: ${breakpoint780}px) {
+        margin: 0 25px;
+      }
+
+      @media (max-width: 560px) {
+        margin: 25px;
+      }
+
+      @media (max-width: 460px) {
+        margin: 10px;
+      }
+    }
   `;
 
   return (
     <StylesProvider injectFirst>
       <div>
-        <Container
-          maxWidth="md"
-          style={{ height: containerHeight, border: "1px solid black" }}
-        >
+        <Container maxWidth="md" css={containerCss}>
           <p>Search DOB Records</p>
+          <Button
+            onClick={() => setExpandedView(!expandedView)}
+            css={expandButton}
+            color={expandedView ? "primary" : "secondary"}
+          >
+            {expandedView ? "CONTRACT" : "EXPAND"}
+          </Button>
           <form>
             <Grid
               container={true}
-              style={{
-                position: "relative",
-                padding: "0 100px",
-                width: "100%",
-                marginBottom: "10px",
-              }}
+              css={innerGridCss}
               direction="row"
               alignItems="center"
-              justify="space-between"
+              justify="center"
+              wrap="wrap"
+              alignContent="flex-start"
             >
-              <Button
-                onClick={() => setExpandedView(!expandedView)}
-                style={{ position: "absolute", left: "0" }}
-                color={expandedView ? "primary" : "secondary"}
-              >
-                {expandedView ? "CONTRACT" : "EXPAND"}
-              </Button>
-              <Select
-                onChange={(e) => updateFormData(e, "Borough")}
-                multiple
-                label="Borough"
-                value={formData.borough}
-              >
-                {borough.sort().map((item, i) => {
-                  return (
-                    <MenuItem key={item} value={item}>
-                      {item}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-
               <Input
-                value={formData.block}
-                onChange={(e) => updateFormData(e, "Block")}
-                type="number"
-                placeholder="Block"
-                color="secondary"
-              />
-              <Input
-                value={formData.lot}
-                onChange={(e) => updateFormData(e, "Lot")}
-                type="number"
-                placeholder="Lot"
+                css={addressCss}
+                value={formData.address}
+                onChange={(e) => updateFormData(e, "StreetNumber")}
+                onBlur={() => getAddressFromGeo(formData.address)}
+                onFocus={clearGetAddress}
+                type="text"
+                placeholder="Address"
                 color="secondary"
               />
             </Grid>
-            <div style={{ display: hideStyle }}>
+
+            <div css={hideContainer}>
               <Grid
                 container={true}
-                style={{
-                  padding: "0 100px",
-                  width: "100%",
-                  marginBottom: "10px",
-                }}
+                css={innerGridCss}
                 direction="row"
                 alignItems="center"
-                justify="center"
+                justify="space-between"
+                wrap="wrap"
+                alignContent="flex-start"
               >
+                <Select
+                  style={{ width: "30%" }}
+                  onChange={(e) => updateFormData(e, "Borough")}
+                  multiple
+                  label="Borough"
+                  value={formData.borough}
+                >
+                  {borough.sort().map((item, i) => {
+                    return (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+
                 <Input
-                  style={{ width: "400px", textAlign: "center" }}
-                  value={formData.address}
-                  onChange={(e) => updateFormData(e, "StreetNumber")}
-                  onBlur={() => getAddressFromGeo(formData.address)}
-                  type="text"
-                  placeholder="Address"
+                  style={{ width: "30%" }}
+                  value={formData.block}
+                  onChange={(e) => updateFormData(e, "Block")}
+                  type="number"
+                  placeholder="Block"
+                  color="secondary"
+                />
+                <Input
+                  style={{ width: "30%" }}
+                  value={formData.lot}
+                  onChange={(e) => updateFormData(e, "Lot")}
+                  type="number"
+                  placeholder="Lot"
                   color="secondary"
                 />
               </Grid>
               <Grid
                 container={true}
-                style={{
-                  padding: "0 100px",
-                  width: "100%",
-                  marginBottom: "10px",
-                }}
+                css={innerGridCss}
                 direction="row"
                 alignItems="center"
                 justify="space-between"
+                wrap="wrap"
+                alignContent="flex-start"
               >
-                <div>
+                <div style={{ width: "25%" }}>
                   <InputLabel>Community Board</InputLabel>
                   <Select
+                    style={{ width: "100%" }}
                     label="Community Board"
                     onChange={(e) => updateFormData(e, "CommunityBoard")}
                     multiple
@@ -236,9 +343,10 @@ export default function Search({
                   </Select>
                 </div>
 
-                <div>
+                <div style={{ width: "25%" }}>
                   <InputLabel>Council District</InputLabel>
                   <Select
+                    style={{ width: "100%" }}
                     onChange={(e) => updateFormData(e, "CouncilDistrict")}
                     multiple
                     label="Council District"
@@ -343,18 +451,17 @@ export default function Search({
               </Grid>
               <Grid
                 container={true}
-                style={{
-                  padding: "0 100px",
-                  width: "100%",
-                  marginBottom: "10px",
-                }}
+                css={innerGridCss}
                 direction="row"
                 alignItems="center"
                 justify="space-between"
+                wrap="wrap"
+                alignContent="flex-start"
               >
-                <div>
+                <div style={{ width: "25%" }}>
                   <InputLabel>Building Type</InputLabel>
                   <Select
+                    style={{ width: "100%" }}
                     onChange={(e) => updateFormData(e, "BuildingType")}
                     multiple
                     label="Building Type"
@@ -372,9 +479,10 @@ export default function Search({
                   </Select>
                 </div>
 
-                <div>
+                <div style={{ width: "25%" }}>
                   <InputLabel>Job Type</InputLabel>
                   <Select
+                    style={{ width: "100%" }}
                     onChange={(e) => updateFormData(e, "JobType")}
                     multiple
                     label="Job Type"
@@ -390,9 +498,10 @@ export default function Search({
                   </Select>
                 </div>
 
-                <div>
+                <div style={{ width: "25%" }}>
                   <InputLabel>Permit Status</InputLabel>
                   <Select
+                    style={{ width: "100%" }}
                     onChange={(e) => updateFormData(e, "PermitStatus")}
                     multiple
                     label="Permit Status"
@@ -410,14 +519,12 @@ export default function Search({
               </Grid>
               <Grid
                 container={true}
-                style={{
-                  padding: "0 100px",
-                  width: "100%",
-                  marginBottom: "10px",
-                }}
+                css={innerGridCss}
                 direction="row"
                 alignItems="center"
-                justify="center"
+                justify="space-between"
+                wrap="wrap"
+                alignContent="flex-start"
               >
                 <TextField
                   css={dateCss}
@@ -442,14 +549,12 @@ export default function Search({
               </Grid>
               <Grid
                 container={true}
-                style={{
-                  padding: "0 100px",
-                  width: "100%",
-                  marginBottom: "10px",
-                }}
+                css={innerGridCss}
                 direction="row"
                 alignItems="center"
-                justify="center"
+                justify="space-between"
+                wrap="wrap"
+                alignContent="flex-start"
               >
                 <TextField
                   css={dateCss}
@@ -473,19 +578,17 @@ export default function Search({
                 />
               </Grid>
             </div>
-            <Grid
+            <div
               container={true}
-              style={{
-                padding: "0 100px",
-                width: "100%",
-                marginBottom: "10px",
-              }}
+              css={buttonContainerCss}
               direction="row"
               alignItems="center"
               justify="center"
+              wrap="wrap"
+              alignContent="flex-start"
             >
               <Button
-                style={{ margin: "0 50px" }}
+                disabled={disableButton ? true : false}
                 onClick={(e) => getReqData(e)}
                 variant="outlined"
                 color="primary"
@@ -493,25 +596,14 @@ export default function Search({
                 Submit
               </Button>
               <Button
-                onClick={() => getAddressFromGeo(formData.address)}
+                onClick={clearResultsHandler}
                 variant="outlined"
                 color="secondary"
               >
                 Clear Results
               </Button>
-            </Grid>
+            </div>
           </form>
-          <Grid
-            container={true}
-            style={{
-              padding: "0 100px",
-              width: "100%",
-              marginBottom: "10px",
-            }}
-            direction="row"
-            alignItems="center"
-            justify="center"
-          ></Grid>
         </Container>
       </div>
     </StylesProvider>
