@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Grid,
@@ -17,6 +17,16 @@ import {
   breakpoint400,
   breakpoint300,
 } from "../../styles/breakpoints.js";
+import { DataGrid } from "@material-ui/data-grid";
+import { makeStyles } from "@material-ui/core/styles";
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TablePagination from "@material-ui/core/TablePagination";
+import TableRow from "@material-ui/core/TableRow";
 
 const Results = ({ reqData }) => {
   const mainContainer = css`
@@ -101,100 +111,136 @@ const Results = ({ reqData }) => {
       width: auto;
     }
   `;
-  let responseText;
-  if (reqData !== null) {
-    responseText = reqData.map((item, i) => {
-      return (
-        <Grid
-          container={true}
-          css={mapContainer}
-          direction="row"
-          alignItems="center"
-          justify="center"
-          wrap="wrap"
-          alignContent="flex-start"
-        >
-          <Grid
-            css={mapInnerContainer}
-            container={true}
-            direction="column"
-            alignItems="flex-start"
-            justify="space-around"
-            wrap="wrap"
-            alignContent="flex-start"
-          >
-            <li>
-              <span>Borough:</span> {item.borough}
-            </li>
-            <li>
-              <span>Block:</span> {item.block}
-            </li>
-            <li>
-              <span>Lot:</span> {item.lot}
-            </li>
-          </Grid>
-          <Grid
-            css={mapInnerContainer}
-            container={true}
-            direction="column"
-            alignItems="flex-start"
-            justify="space-around"
-            wrap="wrap"
-            alignContent="flex-start"
-          >
-            <li>
-              <span>Address:</span> {item.house__} {item.street_name}
-            </li>
-            <li>
-              <span>Neighborhood:</span> {item.gis_nta_name}
-            </li>
-          </Grid>
 
-          <Grid
-            css={mapInnerContainer}
-            container={true}
-            direction="column"
-            alignItems="flex-start"
-            justify="space-around"
-            wrap="wrap"
-            alignContent="flex-start"
-          >
-            <li>
-              <span>Permit Number:</span> {item.permit_si_no}
-            </li>
-            <li>
-              <span>Permit Type:</span> {item.permit_type}
-            </li>
-            <li>
-              <span>Job Type:</span> {item.job_type}
-            </li>
-            <li>
-              <span>Permit Status:</span> {item.permit_status}
-            </li>
-          </Grid>
-          <Grid
-            css={mapInnerContainer}
-            container={true}
-            direction="column"
-            alignItems="flex-start"
-            justify="space-around"
-            wrap="wrap"
-            alignContent="flex-start"
-          >
-            <li>
-              <span>Filing Date:</span> {item.filing_date}
-            </li>
-            <li>
-              <span>Issuance Date:</span> {item.issuance_date}
-            </li>
-            <li>
-              <span>Job Start Date:</span> {item.job_start_date}
-            </li>
-          </Grid>
-        </Grid>
-      );
-    });
+  const columns = [
+    { field: "Borough", headerName: "Borough", width: 120, align: "left" },
+    { field: "Address", headerName: "Address", width: 70, align: "center" },
+    {
+      field: "Block",
+      headerName: "Block",
+      type: "number",
+      width: 70,
+      align: "center",
+    },
+    {
+      field: "Lot",
+      headerName: "Lot",
+      type: "number",
+      width: 70,
+      align: "center",
+    },
+    {
+      field: "Neighborhood",
+      headerName: "Neighborhood",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "PermitNumber",
+      headerName: "Permit Number",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "PermitType",
+      headerName: "Permit Type",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "JobType",
+      headerName: "Job Type",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "PermitStatus",
+      headerName: "Permit Status",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "FilingDate",
+      headerName: "Filing Date",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "IssuanceDate",
+      headerName: "Issuance Date",
+      width: 120,
+      align: "center",
+    },
+    {
+      field: "JobStartDate",
+      headerName: "Job Start Date",
+      width: 120,
+      align: "center",
+    },
+  ];
+
+  let rows = [
+    {
+      id: "1",
+      Borough: "",
+      Address: "",
+      Block: "",
+      Lot: "",
+      Neighborhood: "",
+      PermitNumber: "",
+      PermitType: "",
+      JobType: "",
+      PermitStatus: "",
+      FilingDate: "",
+      IssuanceDate: "",
+      JobStartDate: "",
+    },
+  ];
+  if (reqData !== null) {
+    rows = [
+      reqData.map((item, i) => {
+        return {
+          id: i,
+          Borough: item.borough,
+          Address: item.house__ + " " + item.street_name,
+          Block: item.block,
+          Lot: item.lot,
+          Neighborhood: item.gis_nta_name,
+          PermitNumber: item.permit_si_no,
+          PermitType: item.permit_type,
+          JobType: item.job_type,
+          PermitStatus: item.permit_status,
+          FilingDate: item.filing_date,
+          IssuanceDate: item.issuance_date,
+          JobStartDate: item.job_start_date,
+        };
+      }),
+    ];
   }
+
+  const useStyles = makeStyles({
+    root: {
+      width: "100%",
+    },
+    container: {
+      maxHeight: 440,
+    },
+  });
+
+  const classes = useStyles();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  console.log(rows);
   return (
     <StylesProvider injectFirst>
       <div css={mainContainer}>
@@ -202,7 +248,65 @@ const Results = ({ reqData }) => {
           <p>{reqData ? "Results" : null}</p>
         </div>
         <div css={listContainer}>
-          <ul style={{ width: "100%", listStyle: "none" }}>{responseText}</ul>
+          <Paper className={classes.root}>
+            <TableContainer className={classes.container}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.field}
+                        align={column.align}
+                        style={{ width: column.width }}
+                      >
+                        {column.headerName}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, i) => {
+                      console.log("row", row);
+                      return (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.id}
+                        >
+                          {columns.map((column) => {
+                            console.log(row[row.id][column.field]);
+                            const value = row[row.id][column.field];
+
+                            return (
+                              <TableCell
+                                key={column.field}
+                                align={column.align}
+                              >
+                                {column.format && typeof value === "number"
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+          </Paper>
         </div>
       </div>
     </StylesProvider>
