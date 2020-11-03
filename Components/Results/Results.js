@@ -46,7 +46,7 @@ const Results = ({ reqData }) => {
 
   const listContainer = css`
   position: relative;
-  top: 50px;
+  top: 0px;
   left: 10%;
   height: ${reqData ? `500px` : `0px`};
   width: 80%;

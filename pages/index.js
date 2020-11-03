@@ -47,7 +47,10 @@ export default function Home(props) {
     },
   });
   const [reqData, setReqData] = useState(null);
-  const [addressAlert, setAddressAlert] = useState(false);
+  const [addressAlert, setAddressAlert] = useState({
+    alert: false,
+    message: "",
+  });
 
   const clearResultsHandler = () => {
     setReqData(null);
@@ -181,7 +184,30 @@ export default function Home(props) {
   };
 
   const addressAlertHandler = (type) => {
-    setAddressAlert(true);
+    switch (type) {
+      case "noResults":
+        setAddressAlert({
+          alert: true,
+          message: "No results based on criteria entered",
+        });
+        break;
+      case "invalidAddress":
+        setAddressAlert({
+          alert: true,
+          message: "Address must be within the 5 boroughs of NYC",
+        });
+        break;
+      default:
+        null;
+    }
+
+    setFormData({
+      ...formData,
+      address: "",
+      street_name: "",
+      street_number: "",
+      zip_code: "",
+    });
   };
 
   const getAddressFromGeo = (address) => {
@@ -213,7 +239,7 @@ export default function Home(props) {
             res.results[0].address_components[4].short_name.toUpperCase() !==
               "RICHMOND COUNTY"
           ) {
-            addressAlertHandler();
+            addressAlertHandler("invalidAddress");
           } else {
             setFormData({
               ...formData,
@@ -248,8 +274,12 @@ export default function Home(props) {
     axios
       .get("https://data.cityofnewyork.us/resource/ipu4-2q9a.json", request)
       .then((res) => {
-        setReqData(res.data);
-        console.log(res.data);
+        if (res.data.length === 0) {
+          addressAlertHandler("noResults");
+        } else {
+          setReqData(res.data);
+          console.log("req data", res.data);
+        }
       })
       .catch((err) => {
         console.log(err);

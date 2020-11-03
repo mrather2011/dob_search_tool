@@ -24,6 +24,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { StylesProvider } from "@material-ui/core/styles";
+import Alert from "../Alert";
 
 export default function Search({
   updateFormData,
@@ -645,7 +646,7 @@ export default function Search({
             </div>
           </form>
         </Container>
-        <div>{addressAlert ? "Address Not Valid" : null}</div>
+        <Alert addressAlert={addressAlert} />
       </div>
     </StylesProvider>
   );

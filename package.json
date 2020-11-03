@@ -14,10 +14,12 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "axios": "^0.20.0",
     "emotion": "^10.0.27",
+    "framer-motion": "^2.9.4",
     "moment": "^2.29.1",
     "next": "9.5.5",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-geocode": "^0.2.2"
+    "react-geocode": "^0.2.2",
+    "react-intersection-observer": "^8.30.1"
   }
 }
