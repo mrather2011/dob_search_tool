@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 
 import { jsx, css } from "@emotion/core";
 import {
+  breakpoint1040,
   breakpoint780,
   breakpoint640,
   breakpoint500,
@@ -43,6 +44,7 @@ export default function Search({
   disableButton,
   clearGetAddress,
   clearResultsHandler,
+  addressAlert,
 }) {
   const [expandedView, setExpandedView] = useState(false);
   let hideHeight = "auto";
@@ -57,6 +59,40 @@ export default function Search({
     innerGridHeight = "1px";
     innerGridOpacity = "0";
   }
+
+  const headerText = css`
+    padding: 0 50px;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 150px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    // border: 1px solid black;
+
+    p {
+      font-size: 3rem;
+      text-align: center;
+    }
+
+    @media (max-width: ${breakpoint1040}px) {
+      height: 100px;
+
+      p {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: ${breakpoint640}px) {
+      padding: 0 10px;
+      p {
+        font-size: 1.5rem;
+      }
+    }
+  `;
 
   const containerCss = css`
     height: ${containerHeight};
@@ -150,13 +186,15 @@ export default function Search({
 
     button {
       margin: 0 50px;
+      height: 50px;
+      width: 150px;
 
       @media (max-width: ${breakpoint780}px) {
         margin: 0 25px;
       }
 
       @media (max-width: 560px) {
-        margin: 25px;
+        margin: 15px;
       }
 
       @media (max-width: 460px) {
@@ -168,8 +206,10 @@ export default function Search({
   return (
     <StylesProvider injectFirst>
       <div>
+        <div css={headerText}>
+          <p>Search the NYC Dept of Buildings Records</p>
+        </div>
         <Container maxWidth="md" css={containerCss}>
-          <p>Search DOB Records</p>
           <Button
             onClick={() => setExpandedView(!expandedView)}
             css={expandButton}
@@ -605,6 +645,7 @@ export default function Search({
             </div>
           </form>
         </Container>
+        <div>{addressAlert ? "Address Not Valid" : null}</div>
       </div>
     </StylesProvider>
   );

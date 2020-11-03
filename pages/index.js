@@ -47,6 +47,7 @@ export default function Home(props) {
     },
   });
   const [reqData, setReqData] = useState(null);
+  const [addressAlert, setAddressAlert] = useState(false);
 
   const clearResultsHandler = () => {
     setReqData(null);
@@ -179,6 +180,10 @@ export default function Home(props) {
     }
   };
 
+  const addressAlertHandler = (type) => {
+    setAddressAlert(true);
+  };
+
   const getAddressFromGeo = (address) => {
     Geocode.setApiKey(process.env.NEXT_PUBLIC_APIKey);
     Geocode.setLanguage("en");
@@ -196,13 +201,28 @@ export default function Home(props) {
       Geocode.fromAddress(address)
         .then((res) => {
           console.log(res.results[0]);
-          setFormData({
-            ...formData,
-            address: res.results[0].formatted_address,
-            street_name: res.results[0].address_components[1].short_name.toUpperCase(),
-            street_number: res.results[0].address_components[0].short_name.toString(),
-            zip_code: res.results[0].address_components[7].short_name.toString(),
-          });
+          if (
+            res.results[0].address_components[4].short_name.toUpperCase() !==
+              "NEW YORK COUNTY" &&
+            res.results[0].address_components[4].short_name.toUpperCase() !==
+              "KINGS COUNTY" &&
+            res.results[0].address_components[4].short_name.toUpperCase() !==
+              "BRONX" &&
+            res.results[0].address_components[4].short_name.toUpperCase() !==
+              "QUEENS COUNTY" &&
+            res.results[0].address_components[4].short_name.toUpperCase() !==
+              "RICHMOND COUNTY"
+          ) {
+            addressAlertHandler();
+          } else {
+            setFormData({
+              ...formData,
+              address: res.results[0].formatted_address,
+              street_name: res.results[0].address_components[1].short_name.toUpperCase(),
+              street_number: res.results[0].address_components[0].short_name.toString(),
+              zip_code: res.results[0].address_components[7].short_name.toString(),
+            });
+          }
         })
         .catch((err) => {
           setFormData({
@@ -215,6 +235,12 @@ export default function Home(props) {
         });
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setAddressAlert(false);
+    }, 3000);
+  }, [addressAlert]);
 
   const getReqData = (e) => {
     e.preventDefault();
@@ -439,6 +465,7 @@ export default function Home(props) {
       </Head>
 
       <Search
+        addressAlert={addressAlert}
         clearResultsHandler={clearResultsHandler}
         clearGetAddress={clearGetAddress}
         disableButtonHandler={disableButtonHandler}

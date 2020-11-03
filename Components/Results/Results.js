@@ -45,8 +45,11 @@ const Results = ({ reqData }) => {
   `;
 
   const listContainer = css`
+  position: relative;
+  top: 50px;
+  left: 10%;
   height: ${reqData ? `500px` : `0px`};
-  width: 100%;
+  width: 80%;
   overflow: scroll;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
@@ -113,109 +116,136 @@ const Results = ({ reqData }) => {
   `;
 
   const columns = [
-    { field: "Borough", headerName: "Borough", width: 120, align: "left" },
-    { field: "Address", headerName: "Address", width: 70, align: "center" },
+    { id: "Borough", label: "Borough", minWidth: 170, align: "left" },
     {
-      field: "Block",
-      headerName: "Block",
-      type: "number",
-      width: 70,
+      id: "Address",
+      label: "Address",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "Lot",
-      headerName: "Lot",
-      type: "number",
-      width: 70,
+      id: "Block",
+      label: "Block",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "Neighborhood",
-      headerName: "Neighborhood",
-      width: 120,
+      id: "Lot",
+      label: "Lot",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toFixed(2),
     },
     {
-      field: "PermitNumber",
-      headerName: "Permit Number",
-      width: 120,
+      id: "Neighborhood",
+      label: "Neighborhood",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "PermitType",
-      headerName: "Permit Type",
-      width: 120,
+      id: "PermitNumber",
+      label: "Permit Number",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "JobType",
-      headerName: "Job Type",
-      width: 120,
+      id: "PermitType",
+      label: "Permit Type",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "PermitStatus",
-      headerName: "Permit Status",
-      width: 120,
+      id: "JobType",
+      label: "Job Type",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "FilingDate",
-      headerName: "Filing Date",
-      width: 120,
+      id: "PermitStatus",
+      label: "Permit Status",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "IssuanceDate",
-      headerName: "Issuance Date",
-      width: 120,
+      id: "FilingDate",
+      label: "Filing Date",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
     {
-      field: "JobStartDate",
-      headerName: "Job Start Date",
-      width: 120,
+      id: "IssuanceDate",
+      label: "Issuance Date",
+      minWidth: 170,
       align: "center",
+      format: (value) => value.toLocaleString("en-US"),
+    },
+    {
+      id: "JobStartDate",
+      label: "Job Start Date",
+      minWidth: 170,
+      align: "center",
+      format: (value) => value.toLocaleString("en-US"),
     },
   ];
 
-  let rows = [
-    {
-      id: "1",
-      Borough: "",
-      Address: "",
-      Block: "",
-      Lot: "",
-      Neighborhood: "",
-      PermitNumber: "",
-      PermitType: "",
-      JobType: "",
-      PermitStatus: "",
-      FilingDate: "",
-      IssuanceDate: "",
-      JobStartDate: "",
-    },
-  ];
-  if (reqData !== null) {
-    rows = [
-      reqData.map((item, i) => {
-        return {
-          id: i,
-          Borough: item.borough,
-          Address: item.house__ + " " + item.street_name,
-          Block: item.block,
-          Lot: item.lot,
-          Neighborhood: item.gis_nta_name,
-          PermitNumber: item.permit_si_no,
-          PermitType: item.permit_type,
-          JobType: item.job_type,
-          PermitStatus: item.permit_status,
-          FilingDate: item.filing_date,
-          IssuanceDate: item.issuance_date,
-          JobStartDate: item.job_start_date,
-        };
-      }),
-    ];
+  function createData(
+    Borough,
+    Address,
+    Block,
+    Lot,
+    Neighborhood,
+    PermitNumber,
+    PermitType,
+    JobType,
+    PermitStatus,
+    FilingDate,
+    IssuanceDate,
+    JobStartDate
+  ) {
+    return {
+      Borough,
+      Address,
+      Block,
+      Lot,
+      Neighborhood,
+      PermitNumber,
+      PermitType,
+      JobType,
+      PermitStatus,
+      FilingDate,
+      IssuanceDate,
+      JobStartDate,
+    };
+  }
+
+  const rows = [];
+
+  if (reqData) {
+    reqData.forEach((item, i) =>
+      rows.push(
+        createData(
+          item.borough,
+          item.house__ + " " + item.street_name,
+          item.block,
+          item.lot,
+          item.gis_nta_name,
+          item.permit_si_no,
+          item.permit_type,
+          item.permit_status,
+          item.filing_date,
+          item.issuance_date,
+          item.job_start_date
+        )
+      )
+    );
   }
 
   const useStyles = makeStyles({
@@ -240,13 +270,12 @@ const Results = ({ reqData }) => {
     setPage(0);
   };
 
-  console.log(rows);
   return (
     <StylesProvider injectFirst>
       <div css={mainContainer}>
-        <div css={resultsCss}>
+        {/* <div css={resultsCss}>
           <p>{reqData ? "Results" : null}</p>
-        </div>
+        </div> */}
         <div css={listContainer}>
           <Paper className={classes.root}>
             <TableContainer className={classes.container}>
@@ -255,11 +284,11 @@ const Results = ({ reqData }) => {
                   <TableRow>
                     {columns.map((column) => (
                       <TableCell
-                        key={column.field}
+                        key={column.id}
                         align={column.align}
-                        style={{ width: column.width }}
+                        style={{ minWidth: column.minWidth }}
                       >
-                        {column.headerName}
+                        {column.label}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -268,23 +297,17 @@ const Results = ({ reqData }) => {
                   {rows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row, i) => {
-                      console.log("row", row);
                       return (
                         <TableRow
                           hover
                           role="checkbox"
                           tabIndex={-1}
-                          key={row.id}
+                          key={row.code}
                         >
                           {columns.map((column) => {
-                            console.log(row[row.id][column.field]);
-                            const value = row[row.id][column.field];
-
+                            const value = row[column.id];
                             return (
-                              <TableCell
-                                key={column.field}
-                                align={column.align}
-                              >
+                              <TableCell key={column.id} align={column.align}>
                                 {column.format && typeof value === "number"
                                   ? column.format(value)
                                   : value}
