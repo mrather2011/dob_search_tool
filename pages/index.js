@@ -233,7 +233,7 @@ export default function Home(props) {
             res.results[0].address_components[4].short_name.toUpperCase() !==
               "KINGS COUNTY" &&
             res.results[0].address_components[4].short_name.toUpperCase() !==
-              "BRONX" &&
+              "BRONX COUNTY" &&
             res.results[0].address_components[4].short_name.toUpperCase() !==
               "QUEENS COUNTY" &&
             res.results[0].address_components[4].short_name.toUpperCase() !==
